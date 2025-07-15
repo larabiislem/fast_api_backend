@@ -3,7 +3,7 @@ from fastapi import FastAPI , Depends , HTTPException , status
 from sqlalchemy.orm import Session
 from .database import engine , SessionLocal
 from . import modal
-
+from .hacing import Hash
 
 # This will create all tables defined with Base (including user)
 modal.Base.metadata.create_all(bind=engine)
@@ -25,7 +25,9 @@ def read_root(item: scemat.Item , db: Session = Depends(get_db)):
         name=item.name,
         description=item.description,
         price=item.price,
-        is_available=item.is_available
+        is_available=item.is_available,
+        owner_id=item.owner_id
+        
     )
     db.add(new_item)
     db.commit()
@@ -78,3 +80,27 @@ def update_item(item_id: int, price: int, db: Session = Depends(get_db)):
     
     
     return {"detail": "Item updated successfully", "item_id": item_id, "new_price": price}
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED,response_model=scemat.UserResponse)
+def creat_user(user: scemat.User, db: Session = Depends(get_db)):
+    hashed_password = Hash.hash_password(user.hashed_password)
+    new_user = modal.user(
+        name=user.name,
+        email=user.email,
+        hashed_password=hashed_password,
+        is_active=user.is_active
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    db.close()
+
+    return new_user
+
+@app.get("/users", status_code=status.HTTP_200_OK, response_model=list[scemat.UserResponse])
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(modal.user).all()
+    db.close()
+    return users
+

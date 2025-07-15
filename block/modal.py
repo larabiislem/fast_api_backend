@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from  .database import Base
 
 
@@ -12,6 +13,11 @@ class user(Base):
     is_active = Column(Boolean, default=True)
 
 
+    items = relationship("Item", back_populates="owner")
+
+    
+
+
 
 class Item(Base):
     __tablename__ = "items"
@@ -21,6 +27,10 @@ class Item(Base):
     description = Column(String, index=True)
     price = Column(Float)
     is_available = Column(Boolean, default=True)
+
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner = relationship("user", back_populates="items")
+
 
 class Order(Base):
     __tablename__ = "orders"
