@@ -30,3 +30,19 @@ class UserResponse(User):
 
     class Config:
         orm_mode = True
+
+
+class UserLogin(BaseModel):
+    email: str
+    hashed_password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    email: str | None = None
+
+    class Config:
+        orm_mode = True

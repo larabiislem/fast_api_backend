@@ -3,6 +3,7 @@ from fastapi import FastAPI , Depends , HTTPException , status , APIRouter
 from sqlalchemy.orm import Session
 from ..database import get_db
 from .. import modal
+from ..token import get_current_user
 
 
 router = APIRouter(
@@ -27,8 +28,8 @@ def read_root(item: scemat.Item , db: Session = Depends(get_db)):
 
     return new_item
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=list[scemat.Responcemodal])
-def get_items(db: Session = Depends(get_db)):
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[scemat.Responcemodal] )
+def get_items(db: Session = Depends(get_db), current_user: scemat.TokenData = Depends(get_current_user)):
     items = db.query(modal.Item).all()
     db.close()
     return items
